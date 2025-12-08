@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 from flask import Flask, jsonify, request
+from sympsolve.equation_solver import equation_solver
 
 
 def create_app() -> Flask:
@@ -22,7 +23,10 @@ def create_app() -> Flask:
         equation = (request.args.get("equation") or "").strip()
         if not equation:
             return jsonify({"error": "Missing 'equation' query parameter"}), 400
-        return jsonify({"result": f"not implemented: solving '{equation}'"})
+        solution = equation_solver(equation)
+        
+        return jsonify({"result": solution['solution']})
+        # return jsonify({"result": f"not implemented: solving '{equation}'"})
 
     @app.route("/", methods=["GET"])
     def root():
