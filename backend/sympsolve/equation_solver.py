@@ -1,4 +1,3 @@
-import re
 from sympy import Eq, solve, sympify, latex
 from sympy.parsing.sympy_parser import parse_expr
 from sympy.core.numbers import I
