@@ -70,12 +70,12 @@ function App() {
 
       let latexList: string[] = [];
 
-      // If backend already sends an array of LaTeX strings:
-      // ["-1 + \\sqrt{11}", "-1 - \\sqrt{11}"]
+      // If backend sends an array of strings
       if (Array.isArray(data.result)) {
         latexList = data.result;
       }
-      // If backend sends a single string like "['-1 + \\sqrt{11}', '-1 - \\sqrt{11}']"
+      
+      // If backend sends a single string but in our case it sends list of strings.
       else if (typeof data.result === 'string' && data.result.trim()) {
         const raw = data.result.trim();
         try {
