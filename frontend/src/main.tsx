@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
-import 'katex/dist/katex.min.css'; // ⬅️ important
+import 'katex/dist/katex.min.css';
 import App from './App';
 
 const rootElement = document.getElementById('root');
