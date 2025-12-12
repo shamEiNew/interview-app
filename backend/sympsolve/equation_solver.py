@@ -79,13 +79,19 @@ def equation_solver(expr_str, plot_filename=None):
                     ys[i] = np.nan
             
             #plotting
+            
             fig, ax = plt.subplots(figsize=(8,4.5))
-            ax.plot(xs, ys)
+
+            # Optional: change border thickness
+            ax.spines['top'].set_linewidth(1)
+            ax.spines['bottom'].set_linewidth(1)
+
+            ax.plot(xs, ys, color='red')
             ax.axhline(0) 
             ax.set_xlabel(str(x_sym))
-            ax.set_ylabel("f({}) = lhs - rhs".format(x_sym))
+            ax.set_ylabel("f({})".format(x_sym))
             ax.set_title("Plot of f({}) = {}".format(x_sym, lhs_str.strip()))
-            ax.grid(True)
+            ax.grid(True, linestyle=':', linewidth=1)
             
            
             marked = []
