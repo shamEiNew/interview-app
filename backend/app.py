@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, url_for, current_app
 from sympsolve.equation_solver import equation_solver
+import uuid
+
 
 
 def create_app() -> Flask:
@@ -24,9 +26,20 @@ def create_app() -> Flask:
         if not equation:
             return jsonify({"error": "Missing 'equation' query parameter"}), 400
         
-        solution = equation_solver(equation)
-        
-        return jsonify({"result": solution['solution']})
+
+        filename = f"plot_{uuid.uuid4().hex}.png"
+        static_plots = os.path.join(current_app.root_path, "static", "plots")
+        os.makedirs(static_plots, exist_ok=True)
+        plot_path = os.path.join(static_plots, filename)
+
+        solution = equation_solver(equation, plot_filename=plot_path)
+
+
+        solution["figure_url"] = url_for("static", filename=f"plots/{filename}", _external=False)
+        try:
+            return jsonify({"result": solution['solution'], "figure_url": solution["figure_url"]})
+        except KeyError:
+            return jsonify({"error": solution.get('error', 'Unknown error')}), 400
 
     @app.route("/", methods=["GET"])
     def root():

@@ -8,15 +8,26 @@ const API_BASE_URL =
 type ApiResult = {
   result?: string | string[];
   error?: string;
+  figure_url?: string;
 };
 type MathBlockProps = {
   latex: string;
+  variable: string;
 };
 
+function extractVariable(equation: string): string {
+  // Remove spaces
+  const clean = equation.replace(/\s+/g, "");
 
-function MathBlock({ latex }: MathBlockProps) {
+  // Find the first standalone alphabetic character (single-letter variable)
+  const match = clean.match(/[a-zA-Z]/);
+
+  return match ? match[0] : "x"; // fallback to x if nothing found
+}
+
+function MathBlock({ latex, variable}: MathBlockProps) {
   const html = useMemo(() => {
-    const expr = `x = ${latex}`;
+    const expr = `${variable} = ${latex}`;
     try {
       return katex.renderToString(expr, {
         throwOnError: false, // do not crash, show error in output instead
@@ -44,6 +55,9 @@ function App() {
   const [result, setResult] = useState<string[]>([]); // store LaTeX strings
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [variable, setVariable] = useState("x");
+  const [figureUrl, setFigureUrl] = useState<string>('');
+  const [figureLoading, setFigureLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -53,6 +67,9 @@ function App() {
       setResult([]);
       return;
     }
+    const v = extractVariable(trimmedEquation);
+    console.log("Detected variable:", v);
+    setVariable(v);
 
     setLoading(true);
     setError('');
@@ -92,7 +109,18 @@ function App() {
       }
 
       setResult(latexList);
-    } catch (err) {
+        if (data.figure_url) {
+    // If backend returns relative path like "/static/plots/plot_xxx.png",
+    // turn into absolute if necessary
+    const url = data.figure_url.startsWith("http")
+      ? data.figure_url
+      : `${API_BASE_URL}${data.figure_url}`;
+    setFigureUrl(url);
+  } else {
+    setFigureUrl('');
+  }
+}
+     catch (err) {
       const message = err instanceof Error ? err.message : 'Request failed';
       setError(message);
     } finally {
@@ -139,13 +167,24 @@ function App() {
 
               return (
                 <div key={index} className="text-lg font-semibold text-emerald-700">
-                  <MathBlock latex={safeLatex} />
+                  <MathBlock latex={safeLatex} variable={variable}/>
             </div>
                 );
           })}
       </div>
       )}
-
+        {figureUrl ? (
+          <div className="mt-4">
+            <p className="text-sm text-slate-700 m-0 mb-2">Plot</p>
+            <img
+              src={figureUrl}
+              alt="Equation plot"
+              className="max-w-full h-auto rounded-md border"
+              onLoad={() => setFigureLoading(false)}
+              onError={() => { setFigureLoading(false); setError("Failed to load plot image"); }}
+            />
+          </div>
+          ) : null}
 
         {error && <p className="m-0 text-sm font-semibold text-red-700">{error}</p>}
 
