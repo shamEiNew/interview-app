@@ -51,7 +51,7 @@ def equation_solver(expr_str, plot_filename=None):
                 try:
 
                     val = complex(sol.evalf())
-                    if abs(val.imag) < 1e-9:
+                    if abs(val.imag) < 1e-9: #sympy may treat is as complex with tiny imag part
                         real_solutions.append(val.real)
                 except Exception:
                     pass
@@ -114,7 +114,7 @@ def equation_solver(expr_str, plot_filename=None):
             result["marked_roots"] = marked
         
         else:
-            # no plot
+            # no plot for multivariate
             result["figure_path"] = None
             result["plot_message"] = "Plot only produced for single-variable equations (found symbols: {}).".format(
                 ",".join([str(s) for s in free_syms])
